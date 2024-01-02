@@ -5,16 +5,15 @@ import os
 import sys
 import tkinter
 
-from dialogProgrammInterest.mainWindow import MainWindow
+from programWithMainWindowBokmarks.mainWindow import MainWindow
 
 application = tkinter.Tk()
 path = os.path.join(os.path.dirname(__file__), "images/")
 if sys.platform.startswith("win"):
     icon = path + "bookmark.ico"
 else:
-    icon = "@" + path + "interest.xbm"
+    icon = "@" + path + "bookmark.xbm"
 application.iconbitmap(icon)
-application.title("Interest")
 window = MainWindow(application)
-application.protocol("WM_DELETE_WINDOW", window.quit)
+application.protocol("WM_DELETE_WINDOW", window.fileQuit)
 application.mainloop()
