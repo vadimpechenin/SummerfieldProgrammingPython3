@@ -4,6 +4,9 @@ import tkinter
 import tkinter.filedialog
 import tkinter.messagebox
 import webbrowser
+import dbm
+import shelve
+import sys
 
 from programWithMainWindowBokmarks.addEditForm import AddEditForm
 
@@ -25,6 +28,9 @@ class MainWindow:
                 ("New...", self.fileNew, "Ctrl+N", "<Control-n>"),
                 ("Open...", self.fileOpen, "Ctrl+O", "<Control-o>"),
                 ("Save", self.fileSave, "Ctrl+S", "<Control-s>"),
+                (None, None, None, None),
+                ("Import", self.fileImport, "Ctrl+I", "<Control-i>"),
+                ("Export", self.fileExport, "Ctrl+X", "<Control-x>"),
                 (None, None, None, None),
                 ("Quit", self.fileQuit, "Ctrl+Q", "<Control-q>")):
             if label is None:
@@ -58,6 +64,8 @@ class MainWindow:
                 ("images/filenew.gif", self.fileNew),
                 ("images/fileopen.gif", self.fileOpen),
                 ("images/filesave.gif", self.fileSave),
+                ("images/fileimport.gif", self.fileImport),
+                ("images/fileexport.gif", self.fileExport),
                 ("images/editadd.gif", self.editAdd),
                 ("images/editedit.gif", self.editEdit),
                 ("images/editdelete.gif", self.editDelete),
@@ -192,6 +200,68 @@ class MainWindow:
                                                self.filename, err), parent=self.parent)
         return True
 
+    def fileImport(self, *ignore):
+        if not self.okayToContinue():
+            return
+        dir = (os.path.dirname(self.filename)
+               if self.filename is not None else ".")
+        suffix = ".dbm.dat" if sys.platform.startswith("win") else ".dbm"
+        filename = tkinter.filedialog.askopenfilename(
+            title="Bookmarks - Import File",
+            initialdir=dir,
+            filetypes=[("Console bookmarks files",
+                        "*" + suffix)],
+            defaultextension=suffix, parent=self.parent)
+        if filename:
+            if sys.platform.startswith("win"):
+                filename = filename[:-4]
+            db = None
+            try:
+                db = shelve.open(filename,
+                                 protocol=pickle.HIGHEST_PROTOCOL)
+                self.dirty = True
+                for name, url in db.items():
+                    self.data[name] = url
+                self.listBox.delete(0, tkinter.END)
+                for name in sorted(self.data, key=str.lower):
+                    self.listBox.insert(tkinter.END, name)
+                self.setStatusBar("Imported {0} bookmarks from {1}"
+                                  .format(self.listBox.size(), filename))
+            except dbm.error as err:
+                tkinter.messagebox.showwarning("Bookmarks - Error",
+                                               "Failed to import {0}:\n{1}".format(
+                                                   filename, err), parent=self.parent)
+            finally:
+                if db is not None:
+                    db.close()
+
+    def fileExport(self, *ignore):
+        suffix = ".dbm.dat" if sys.platform.startswith("win") else ".dbm"
+        filename = tkinter.filedialog.asksaveasfilename(
+            title="Bookmarks - Export File",
+            initialdir=".",
+            filetypes=[("Console bookmarks files",
+                        "*" + suffix)],
+            defaultextension=suffix, parent=self.parent)
+        if filename:
+            if sys.platform.startswith("win"):
+                filename = filename[:-4]
+            db = None
+            try:
+                db = shelve.open(filename,
+                                 protocol=pickle.HIGHEST_PROTOCOL)
+                for name, url in self.data.items():
+                    db[name] = url
+                db.sync()
+                self.setStatusBar("Exported {0} bookmarks to {1}"
+                                  .format(self.listBox.size(), filename))
+            except dbm.error as err:
+                tkinter.messagebox.showwarning("Bookmarks - Error",
+                                               "Failed to export {0}:\n{1}".format(
+                                                   filename, err), parent=self.parent)
+            finally:
+                if db is not None:
+                    db.close()
     def editAdd(self, *ignore):
         form = AddEditForm(self.parent)
         if form.accepted and form.name:
