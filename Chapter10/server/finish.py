@@ -1,0 +1,1 @@
+class Finish(Exception): pass
