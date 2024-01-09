@@ -5,7 +5,7 @@ import pathlib
 
 
 def main():
-    path = pathlib.Path(pathlib.Path(__file__).parent.parent.parent.resolve()).joinpath("data")
+    path = pathlib.Path(pathlib.Path(__file__).parent.parent.parent.parent.resolve()).joinpath("data")
     files = []
     for item in range(3):
         files.append(str(pathlib.Path(path).joinpath("file" + str(item+1) + ".txt")))
