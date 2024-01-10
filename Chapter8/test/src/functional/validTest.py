@@ -3,7 +3,7 @@ import unittest
 from functional.valid import main
 
 
-class DecoratorTest(unittest.TestCase):
+class ValidTest(unittest.TestCase):
 
     def test_valid(self):
         name = "PMM"
