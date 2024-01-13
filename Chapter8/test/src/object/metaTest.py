@@ -4,7 +4,7 @@ from object.metaclasses.AutoSlotProperties import Product, Point, PointA
 from object.metaclasses.LoadableSaveable import Good
 
 
-class MultipleInheritanceTest(unittest.TestCase):
+class MetaTest(unittest.TestCase):
 
     def test_LoadbleSaveable(self):
         g = Good()
